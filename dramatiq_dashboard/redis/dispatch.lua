@@ -41,11 +41,17 @@ if command == "get_queues_stats" then
         local  q_messages = queue .. ".msgs"
         local dq_messages = queue .. ".DQ.msgs"
         local xq_messages = queue .. ".XQ.msgs"
+        local q_unfetched = queue
+        local dq_unfetched = queue .. ".DQ"
+        local xq_unfetched = queue .. ".XQ"
 
         table.insert(stats, {ARGS[i],
                              redis.call("hlen",  q_messages) or 0,
                              redis.call("hlen", dq_messages) or 0,
-                             redis.call("hlen", xq_messages) or 0})
+                             redis.call("hlen", xq_messages) or 0,
+                             redis.call("llen", q_unfetched) or 0,
+                             redis.call("llen", dq_unfetched) or 0,
+                             redis.call("llen", xq_unfetched) or 0})
     end
 
     return stats
