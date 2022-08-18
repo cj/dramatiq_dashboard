@@ -85,7 +85,7 @@ class RedisInterface:
             workers.append(Worker(
                 name=name.decode("utf-8"),
                 last_seen=datetime.utcfromtimestamp(int(timestamp.decode("utf-8")) / 1000),
-                queue=queue,
+                queue=queue.decode("utf-8"),
                 jobs_in_flight=jobs_in_flight,
             ))
 
