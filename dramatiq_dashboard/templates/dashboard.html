@@ -6,82 +6,78 @@
 
 {% block content %}
   {% call row() %}
-    {% call column() %}
-      {% call panel() %}
-        <table class="table">
-          <thead>
+    {% call panel() %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Queue</th>
+            <th>Total Ready (hlen ".msgs")</th>
+            <th>Total Delayed (hlen ".DQ.msgs")</th>
+            <th>Total Failed (hlen ".XQ.msgs") </th>
+            <th>Unfetched Ready (llen ".")</th>
+            <th>Unfetched Delayed (llen ".DQ")</th>
+            <th>Unfetched Failed (llen ".XQ") </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for queue in queues %}
             <tr>
-              <th>Queue</th>
-              <th>Total Ready (hlen ".msgs")</th>
-              <th>Total Delayed (hlen ".DQ.msgs")</th>
-              <th>Total Failed (hlen ".XQ.msgs") </th>
-              <th>Unfetched Ready (llen ".")</th>
-              <th>Unfetched Delayed (llen ".DQ")</th>
-              <th>Unfetched Failed (llen ".XQ") </th>
+              <td class="table__subject">
+                <a href="{{ make_uri('queues', queue.name) }}">
+                  {{ queue.name }}
+                </a>
+              </td>
+              <td class="table__number table__number--primary">
+                {{ queue.total_ready|short }}
+              </td>
+              <td class="table__number table__number--secondary">
+                {{ queue.total_delayed|short }}
+              </td>
+              <td class="table__number table__number--tertiary">
+                {{ queue.total_failed|short }}
+              </td>
+              <td class="table__number table__number--primary">
+                {{ queue.ready_unfetched|short }}
+              </td>
+              <td class="table__number table__number--secondary">
+                {{ queue.delayed_unfetched|short }}
+              </td>
+              <td class="table__number table__number--tertiary">
+                {{ queue.failed_unfetched|short }}
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {% for queue in queues %}
-              <tr>
-                <td class="table__subject">
-                  <a href="{{ make_uri('queues', queue.name) }}">
-                    {{ queue.name }}
-                  </a>
-                </td>
-                <td class="table__number table__number--primary">
-                  {{ queue.total_ready|short }}
-                </td>
-                <td class="table__number table__number--secondary">
-                  {{ queue.total_delayed|short }}
-                </td>
-                <td class="table__number table__number--tertiary">
-                  {{ queue.total_failed|short }}
-                </td>
-                <td class="table__number table__number--primary">
-                  {{ queue.ready_unfetched|short }}
-                </td>
-                <td class="table__number table__number--secondary">
-                  {{ queue.delayed_unfetched|short }}
-                </td>
-                <td class="table__number table__number--tertiary">
-                  {{ queue.failed_unfetched|short }}
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      {% endcall %}
+          {% endfor %}
+        </tbody>
+      </table>
     {% endcall %}
 
-    {% call column() %}
-      {% call panel() %}
-        <table class="table">
-          <thead>
+    {% call panel() %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Worker</th>
+            <th>Jobs</th>
+            <th>Last Seen</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for worker in workers %}
             <tr>
-              <th>Worker</th>
-              <th>Jobs</th>
-              <th>Last Seen</th>
+              <td class="table__subject table__subject--mono">
+                {{ worker.name }}
+              </td>
+              <td class="table__number table__number--primary">
+                {{ worker.jobs_in_flight|short }}
+              </td>
+              <td>
+                <time datetime="{{ worker.last_seen|isoformat }}">
+                  {{ worker.last_seen|timeago }}
+                </time>
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {% for worker in workers %}
-              <tr>
-                <td class="table__subject table__subject--mono">
-                  {{ worker.name }}
-                </td>
-                <td class="table__number table__number--primary">
-                  {{ worker.jobs_in_flight|short }}
-                </td>
-                <td>
-                  <time datetime="{{ worker.last_seen|isoformat }}">
-                    {{ worker.last_seen|timeago }}
-                  </time>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      {% endcall %}
+          {% endfor %}
+        </tbody>
+      </table>
     {% endcall %}
-  {% endcall %}
+    {% endcall %}
 {% endblock %}
