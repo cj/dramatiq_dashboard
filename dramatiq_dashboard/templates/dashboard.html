@@ -12,9 +12,12 @@
           <thead>
             <tr>
               <th>Queue</th>
-              <th>Standard (hlen ".msgs")</th>
-              <th>Delayed (hlen ".DQ.msgs")</th>
-              <th>Failed (hlen ".XQ.msgs") </th>
+              <th>Total Ready (hlen ".msgs")</th>
+              <th>Total Delayed (hlen ".DQ.msgs")</th>
+              <th>Total Failed (hlen ".XQ.msgs") </th>
+              <th>Unfetched Ready (llen ".")</th>
+              <th>Unfetched Delayed (llen ".DQ")</th>
+              <th>Unfetched Failed (llen ".XQ") </th>
             </tr>
           </thead>
           <tbody>
@@ -26,13 +29,22 @@
                   </a>
                 </td>
                 <td class="table__number table__number--primary">
-                  {{ queue.jobs|short }}
+                  {{ queue.total_ready|short }}
                 </td>
                 <td class="table__number table__number--secondary">
-                  {{ queue.jobs_delayed|short }}
+                  {{ queue.total_delayed|short }}
                 </td>
                 <td class="table__number table__number--tertiary">
-                  {{ queue.jobs_dead|short }}
+                  {{ queue.total_failed|short }}
+                </td>
+                <td class="table__number table__number--primary">
+                  {{ queue.ready_unfetched|short }}
+                </td>
+                <td class="table__number table__number--secondary">
+                  {{ queue.delayed_unfetched|short }}
+                </td>
+                <td class="table__number table__number--tertiary">
+                  {{ queue.failed_unfetched|short }}
                 </td>
               </tr>
             {% endfor %}
