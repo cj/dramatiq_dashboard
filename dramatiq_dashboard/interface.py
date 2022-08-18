@@ -22,6 +22,7 @@ class Queue:
 class Worker:
     name: str
     last_seen: datetime
+    queue: str
     jobs_in_flight: int
 
 
@@ -80,10 +81,11 @@ class RedisInterface:
     @property
     def workers(self):
         workers = []
-        for name, timestamp, jobs_in_flight in self.do_get_workers():
+        for name, timestamp, queue, jobs_in_flight in self.do_get_workers():
             workers.append(Worker(
                 name=name.decode("utf-8"),
                 last_seen=datetime.utcfromtimestamp(int(timestamp.decode("utf-8")) / 1000),
+                queue=queue,
                 jobs_in_flight=jobs_in_flight,
             ))
 

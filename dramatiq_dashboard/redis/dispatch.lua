@@ -59,7 +59,7 @@ if command == "get_queues_stats" then
 elseif command == "get_workers" then
     local heartbeats = namespace .. ":__heartbeats__"
     local cursor = "0"
-    local workers = {}
+    local workers_along_with_acks = {}
     while true do
         local results = redis.call("zscan", heartbeats, cursor)
         local next_cursor = results[1]
@@ -70,12 +70,9 @@ elseif command == "get_workers" then
                 local timestamp = worker_ids[i + 1]
                 local acks_pattern = namespace .. ":__acks__." .. id .. ".*"
                 local acks_keys = redis.call("keys", acks_pattern)
-                local total = 0
                 for j=1,#acks_keys do
-                    total = total + redis.call("scard", acks_keys[j])
+                    table.insert(workers, {id, timestamp, acks_keys[j], redis.call("scard", acks_keys[j])})
                 end
-
-                table.insert(workers, {id, timestamp, total})
             end
         end
 
@@ -86,7 +83,7 @@ elseif command == "get_workers" then
         cursor = next_cursor
     end
 
-    return workers
+    return workers_along_with_acks
 
 elseif command == "delete_message" then
     local queue = namespace .. ":" .. ARGS[1]

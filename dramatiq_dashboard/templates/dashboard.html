@@ -58,6 +58,7 @@
         <thead>
           <tr>
             <th>Worker</th>
+            <th>Queue</th>
             <th>Jobs</th>
             <th>Last Seen</th>
           </tr>
@@ -67,6 +68,9 @@
             <tr>
               <td class="table__subject table__subject--mono">
                 {{ worker.name }}
+              </td>
+              <td class="table__number table__subject--mono">
+                {{ worker.queue }}
               </td>
               <td class="table__number table__number--primary">
                 {{ worker.jobs_in_flight|short }}
