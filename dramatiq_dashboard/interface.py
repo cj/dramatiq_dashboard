@@ -82,10 +82,14 @@ class RedisInterface:
     def workers(self):
         workers = []
         for name, timestamp, queue, jobs_in_flight in self.do_get_workers():
+            worker_name = name.decode("utf-8")
+            queue_name = queue.decode("utf-8")
+            assert worker_name in queue_name
+            queue_name = queue_name.replace("dramatiq:__acks__.{}.".format(worker_name), "")
             workers.append(Worker(
-                name=name.decode("utf-8"),
+                name=worker_name,
                 last_seen=datetime.utcfromtimestamp(int(timestamp.decode("utf-8")) / 1000),
-                queue=queue.decode("utf-8"),
+                queue=queue_name,
                 jobs_in_flight=jobs_in_flight,
             ))
 
