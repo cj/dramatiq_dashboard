@@ -71,7 +71,7 @@ elseif command == "get_workers" then
                 local acks_pattern = namespace .. ":__acks__." .. id .. ".*"
                 local acks_keys = redis.call("keys", acks_pattern)
                 for j=1,#acks_keys do
-                    table.insert(workers, {id, timestamp, acks_keys[j], redis.call("scard", acks_keys[j])})
+                    table.insert(workers_along_with_acks, {id, timestamp, acks_keys[j], redis.call("scard", acks_keys[j])})
                 end
             end
         end
