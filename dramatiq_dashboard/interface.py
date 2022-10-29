@@ -96,7 +96,7 @@ class RedisInterface:
         return sorted(workers, key=attrgetter("name"))
 
     def get_queue(self, queue_name):
-        for name, total_ready, total_delayed, total_failed, ready_unfetched, delayed_unfetched, failed_unfetched in self.do_get_queues_stats(*self.broker.queues):
+        for name, total_ready, total_delayed, total_failed, ready_unfetched, delayed_unfetched, failed_unfetched in self.do_get_queues_stats(queue_name):
             return Queue(
                 name=name.decode("utf-8"),
                 total_ready=total_ready,
