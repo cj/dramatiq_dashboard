@@ -10,15 +10,19 @@ from dramatiq.message import Message
 @dataclass
 class Queue:
     name: str
-    jobs: int
-    jobs_delayed: int
-    jobs_dead: int
+    total_ready: int
+    total_delayed: int
+    total_failed: int
+    ready_unfetched: int
+    delayed_unfetched: int
+    failed_unfetched: int
 
 
 @dataclass
 class Worker:
     name: str
     last_seen: datetime
+    queue: str
     jobs_in_flight: int
 
 
@@ -61,12 +65,15 @@ class RedisInterface:
     @property
     def queues(self):
         queues = []
-        for name, jobs, jobs_delayed, jobs_dead in self.do_get_queues_stats(*self.broker.queues):
+        for name, total_ready, total_delayed, total_failed, ready_unfetched, delayed_unfetched, failed_unfetched in self.do_get_queues_stats(*self.broker.queues):
             queues.append(Queue(
                 name=name.decode("utf-8"),
-                jobs=jobs,
-                jobs_delayed=jobs_delayed,
-                jobs_dead=jobs_dead,
+                total_ready=total_ready,
+                total_delayed=total_delayed,
+                total_failed=total_failed,
+                ready_unfetched=ready_unfetched,
+                delayed_unfetched=delayed_unfetched,
+                failed_unfetched=failed_unfetched,
             ))
 
         return sorted(queues, key=attrgetter("name"))
@@ -74,22 +81,30 @@ class RedisInterface:
     @property
     def workers(self):
         workers = []
-        for name, timestamp, jobs_in_flight in self.do_get_workers():
+        for name, timestamp, queue, jobs_in_flight in self.do_get_workers():
+            worker_name = name.decode("utf-8")
+            queue_name = queue.decode("utf-8")
+            assert worker_name in queue_name
+            queue_name = queue_name.replace("dramatiq:__acks__.{}.".format(worker_name), "")
             workers.append(Worker(
-                name=name.decode("utf-8"),
+                name=worker_name,
                 last_seen=datetime.utcfromtimestamp(int(timestamp.decode("utf-8")) / 1000),
+                queue=queue_name,
                 jobs_in_flight=jobs_in_flight,
             ))
 
         return sorted(workers, key=attrgetter("name"))
 
     def get_queue(self, queue_name):
-        for name, jobs, jobs_delayed, jobs_dead in self.do_get_queues_stats(queue_name):
+        for name, total_ready, total_delayed, total_failed, ready_unfetched, delayed_unfetched, failed_unfetched in self.do_get_queues_stats(queue_name):
             return Queue(
                 name=name.decode("utf-8"),
-                jobs=jobs,
-                jobs_delayed=jobs_delayed,
-                jobs_dead=jobs_dead,
+                total_ready=total_ready,
+                total_delayed=total_delayed,
+                total_failed=total_failed,
+                ready_unfetched=ready_unfetched,
+                delayed_unfetched=delayed_unfetched,
+                failed_unfetched=failed_unfetched,
             )
 
     def get_jobs(self, queue_name, cursor=0):

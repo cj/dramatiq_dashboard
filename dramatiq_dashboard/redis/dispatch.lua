@@ -41,11 +41,17 @@ if command == "get_queues_stats" then
         local  q_messages = queue .. ".msgs"
         local dq_messages = queue .. ".DQ.msgs"
         local xq_messages = queue .. ".XQ.msgs"
+        local q_unfetched = queue
+        local dq_unfetched = queue .. ".DQ"
+        local xq_unfetched = queue .. ".XQ"
 
         table.insert(stats, {ARGS[i],
                              redis.call("hlen",  q_messages) or 0,
                              redis.call("hlen", dq_messages) or 0,
-                             redis.call("hlen", xq_messages) or 0})
+                             redis.call("hlen", xq_messages) or 0,
+                             redis.call("llen", q_unfetched) or 0,
+                             redis.call("llen", dq_unfetched) or 0,
+                             redis.call("zcard", xq_unfetched) or 0})
     end
 
     return stats
@@ -53,7 +59,7 @@ if command == "get_queues_stats" then
 elseif command == "get_workers" then
     local heartbeats = namespace .. ":__heartbeats__"
     local cursor = "0"
-    local workers = {}
+    local workers_along_with_acks = {}
     while true do
         local results = redis.call("zscan", heartbeats, cursor)
         local next_cursor = results[1]
@@ -64,12 +70,9 @@ elseif command == "get_workers" then
                 local timestamp = worker_ids[i + 1]
                 local acks_pattern = namespace .. ":__acks__." .. id .. ".*"
                 local acks_keys = redis.call("keys", acks_pattern)
-                local total = 0
                 for j=1,#acks_keys do
-                    total = total + redis.call("scard", acks_keys[j])
+                    table.insert(workers_along_with_acks, {id, timestamp, acks_keys[j], redis.call("scard", acks_keys[j])})
                 end
-
-                table.insert(workers, {id, timestamp, total})
             end
         end
 
@@ -80,7 +83,7 @@ elseif command == "get_workers" then
         cursor = next_cursor
     end
 
-    return workers
+    return workers_along_with_acks
 
 elseif command == "delete_message" then
     local queue = namespace .. ":" .. ARGS[1]

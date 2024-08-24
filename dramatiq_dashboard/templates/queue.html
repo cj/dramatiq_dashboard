@@ -12,15 +12,15 @@
     {% call column() %}
       {% call tabs() %}
         {% call tab("standard", make_uri("queues", queue.name), current_tab) %}
-          Standard (<em class="em em--primary">{{ queue.jobs|short }}</em>)
+          Standard (<em class="em em--primary">{{ queue.total_ready|short }}</em>)
         {% endcall %}
 
         {% call tab("delayed", make_uri("queues", queue.name, "delayed"), current_tab) %}
-          Delayed (<em class="em em--secondary">{{ queue.jobs_delayed|short }}</em>)
+          Delayed (<em class="em em--secondary">{{ queue.total_delayed|short }}</em>)
         {% endcall %}
 
         {% call tab("failed", make_uri("queues", queue.name, "failed"), current_tab) %}
-          Failed (<em class="em em--tertiary">{{ queue.jobs_dead|short }}</em>)
+          Failed (<em class="em em--tertiary">{{ queue.total_failed|short }}</em>)
         {% endcall %}
       {% endcall %}
     {% endcall %}
